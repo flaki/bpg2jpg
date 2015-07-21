@@ -103,53 +103,47 @@ window.BPGDecoder.prototype = {
     G: l.cwrap("bpg_decoder_get_line", "number", ["number", "number"]),
     B: l.cwrap("bpg_decoder_close",
         "void", ["number"]),
-    load: function(a) {
-        var d = new XMLHttpRequest,
-            c = this;
-        d.open("get", a, i);
-        d.responseType = "arraybuffer";
-        d.onload = function() {
-            var a = new Uint8Array(d.response),
-                f, g, j, m, p, q, K, r, n, s, u, G, z, ua, W, Qa;
-            f = c.H();
-            if (0 > c.C(f, a, a.length)) console.log("could not decode image");
-            else {
-                j = c.r(20);
-                c.F(f, j);
-                n = l.HEAPU8;
-                m = l.HEAPU16;
-                s = l.HEAPU32;
-                a = s[j >> 2];
-                g = s[j + 4 >> 2];
-                Qa = m[j + 16 >> 1];
-                K = 4 * a;
-                q = c.r(K);
-                r = 0;
-                for (W = []; !(0 > c.I(f, 1));) {
-                    c.D(f, j, j + 4);
-                    ua = 1E3 * s[j >> 2] / s[j + 4 >> 2];
-                    m = c.K.createImageData(a, g);
-                    u = m.data;
-                    for (z = p = 0; z < g; z++) {
-                        c.G(f,
-                            q);
-                        for (G = 0; G < K; G = G + 1 | 0) u[p] = n[q + G | 0] | 0, p = p + 1 | 0
-                    }
-                    W[r++] = {
-                        img: m,
-                        duration: ua
-                    }
+    load: function(fileUint8Array) {
+        var a = new Uint8Array(fileUint8Array),
+            c = this,
+            f, g, j, m, p, q, K, r, n, s, u, G, z, ua, W, Qa;
+        f = c.H();
+        if (0 > c.C(f, a, a.length)) console.log("could not decode image");
+        else {
+            j = c.r(20);
+            c.F(f, j);
+            n = l.HEAPU8;
+            m = l.HEAPU16;
+            s = l.HEAPU32;
+            a = s[j >> 2];
+            g = s[j + 4 >> 2];
+            Qa = m[j + 16 >> 1];
+            K = 4 * a;
+            q = c.r(K);
+            r = 0;
+            for (W = []; !(0 > c.I(f, 1));) {
+                c.D(f, j, j + 4);
+                ua = 1E3 * s[j >> 2] / s[j + 4 >> 2];
+                m = c.K.createImageData(a, g);
+                u = m.data;
+                for (z = p = 0; z < g; z++) {
+                    c.G(f,
+                        q);
+                    for (G = 0; G < K; G = G + 1 | 0) u[p] = n[q + G | 0] | 0, p = p + 1 | 0
                 }
-                c.o(q);
-                c.o(j);
-                c.B(f);
-                c.loop_count = Qa;
-                c.frames = W;
-                c.imageData = W[0].img;
-                if (c.onload) c.onload()
+                W[r++] = {
+                    img: m,
+                    duration: ua
+                }
             }
-        };
-        d.send()
+            c.o(q);
+            c.o(j);
+            c.B(f);
+            c.loop_count = Qa;
+            c.frames = W;
+            c.imageData = W[0].img;
+            if (c.onload) c.onload()
+        }
     }
 };
 window.onload = function() {
@@ -158,9 +152,7 @@ window.onload = function() {
     d = e.length;
     f = [];
     for (a = 0; a < d; a++) c = e[a], g = c.src, ".bpg" == g.substr(-4, 4).toLowerCase() && (f[f.length] = c);
-    d = f.length;
-    for (a = 0; a < d; a++) {
-        c = f[a];
+    f.forEach(function(c) {
         g = c.src;
         e = document.createElement("canvas");
         c.id && (e.id = c.id);
@@ -169,24 +161,27 @@ window.onload = function() {
         if (j = c.getAttribute("height") | 0) e.style.height = j + "px";
         c.parentNode.replaceChild(e, c);
         j = e.getContext("2d");
-        c = new BPGDecoder(j);
-        c.onload = function(a, c) {
-            function d() {
-                var a =
-                    e.n;
-                ++a >= f.length && (0 == e.loop_count || e.q < e.loop_count ? (a = 0, e.q++) : a = -1);
-                0 <= a && (e.n = a, c.putImageData(f[a].img, 0, 0), setTimeout(d, f[a].duration))
-            }
-            var e = this,
-                f = this.frames,
-                g = f[0].img;
-            a.width = g.width;
-            a.height = g.height;
-            c.putImageData(g, 0, 0);
-            1 < f.length && (e.n = 0, e.q = 0, setTimeout(d, f[0].duration))
-        }.bind(c, e, j);
-        c.load(g)
-    }
+
+        fetch(g).then((r)=>r.arrayBuffer()).then((ab)=>new Uint8Array(ab)).then(function(g) {
+            var dec = new BPGDecoder(j);
+            dec.onload = function(a, c) {
+                function d() {
+                    var a =
+                        e.n;
+                    ++a >= f.length && (0 == e.loop_count || e.q < e.loop_count ? (a = 0, e.q++) : a = -1);
+                    0 <= a && (e.n = a, c.putImageData(f[a].img, 0, 0), setTimeout(d, f[a].duration))
+                }
+                var e = this,
+                    f = this.frames,
+                    g = f[0].img;
+                a.width = g.width;
+                a.height = g.height;
+                c.putImageData(g, 0, 0);
+                1 < f.length && (e.n = 0, e.q = 0, setTimeout(d, f[0].duration))
+            }.bind(dec, e, j);
+            dec.load(g);
+        }).catch((e)=>console.error(e));
+    });
 };
 
 
@@ -932,7 +927,6 @@ function JPEGEncoder(quality) {
 	init();
 
 };
-module.exports = encode;
 
 function encode(imgData, qu) {
   if (typeof qu === 'undefined') qu = 50;
