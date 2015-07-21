@@ -177,6 +177,10 @@ window.onload = function() {
                 a.width = g.width;
                 a.height = g.height;
                 c.putImageData(g, 0, 0);
+                window.decodedImgData = g;
+                window.transcodedImage = 'data:image/jpeg;base64,' + btoa(String.fromCharCode.apply(null, ( encode(g,80).data )));
+                var im=document.createElement('img'); im.src=window.transcodedImage; document.body.appendChild(im);
+
                 1 < f.length && (e.n = 0, e.q = 0, setTimeout(d, f[0].duration))
             }.bind(dec, e, j);
             dec.load(g);
@@ -223,6 +227,7 @@ Basic GUI blocking jpeg encoder
 */
 
 var btoa = btoa || function(buf) {
+  //return new Buffer(buf).toString('base64');
   return new Buffer(buf).toString('base64');
 };
 
@@ -873,8 +878,8 @@ function JPEGEncoder(quality) {
 
 			writeWord(0xFFD9); //EOI
 
-      //return new Uint8Array(byteout);
-      return new Buffer(byteout);
+      return new Uint8Array(byteout);
+      //return new Buffer(byteout);
 
 			var jpegDataUri = 'data:image/jpeg;base64,' + btoa(byteout.join(''));
 
