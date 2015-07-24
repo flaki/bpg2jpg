@@ -83,137 +83,109 @@ l.dynCall_viiiiiiiiii=$.dynCall_viiiiiiiiii;l.dynCall_viiiiiii=$.dynCall_viiiiii
 B.M=$.getTempRet0;if(Y)if("function"===typeof l.locateFile?Y=l.locateFile(Y):l.memoryInitializerPrefixURL&&(Y=l.memoryInitializerPrefixURL+Y),w||ba){var bb=l.readBinary(Y);Q.set(bb,R)}else Na(),Browser.Y(Y,function(a){Q.set(a,R);Oa()},function(){b("could not load memory initializer "+Y)});function fa(a){this.name="ExitStatus";this.message="Program terminated with exit("+a+")";this.status=a}fa.prototype=Error();var cb=k,X=function db(){!l.calledRun&&eb&&fb();l.calledRun||(X=db)};
 function fb(){function a(){if(!l.calledRun&&(l.calledRun=i,!H)){Ia||(Ia=i,U(Ea));U(Fa);x&&cb!==k&&l.a("pre-main prep time: "+(Date.now()-cb)+" ms");if(l.postRun)for("function"==typeof l.postRun&&(l.postRun=[l.postRun]);l.postRun.length;)Ka(l.postRun.shift());U(Ha)}}cb===k&&(cb=Date.now());if(!(0<V)){if(l.preRun)for("function"==typeof l.preRun&&(l.preRun=[l.preRun]);l.preRun.length;)Ja(l.preRun.shift());U(Da);!(0<V)&&!l.calledRun&&(l.setStatus?(l.setStatus("Running..."),setTimeout(function(){setTimeout(function(){l.setStatus("")},
 1);a()},1)):a())}}l.run=l.ia=fb;l.exit=l.Z=function(a){l.noExitRuntime||(H=i,A=h,U(Ga),w?(process.stdout.once("drain",function(){process.exit(a)}),console.log(" "),setTimeout(function(){process.exit(a)},500)):ba&&"function"===typeof quit&&quit(a),b(new fa(a)))};function C(a){a&&(l.print(a),l.a(a));H=i;b("abort() at "+wa()+"\nIf this abort() is unexpected, build with -s ASSERTIONS=1 which can give more information.")}l.abort=l.abort=C;
-if(l.preInit)for("function"==typeof l.preInit&&(l.preInit=[l.preInit]);0<l.preInit.length;)l.preInit.pop()();var eb=i;l.noInitialRun&&(eb=!1);fb();
+if(l.preInit)for("function"==typeof l.preInit&&(l.preInit=[l.preInit]);0<l.preInit.length;)l.preInit.pop()();var eb=i;l.noInitialRun&&(eb=!1);fb();window.BPGDecoder=function(a){this.K=a;this.frames=this.onload=this.imageData=k;this.loop_count=0};
 
 
-/*
- * BPG Javascript decoder
- *
- * Copyright (c) 2014 Fabrice Bellard
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
- * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
-var BPGDecoder = function(ctx) {
-    this.ctx = ctx;
-    this['imageData'] = null;
-    this['onload'] = null;
-    this['frames'] = null;
-    this['loop_count'] = 0;
-}
 
-BPGDecoder.prototype = {
-
-malloc: l.cwrap('malloc', 'number', [ 'number' ]),
-
-free: l.cwrap('free', 'void', [ 'number' ]),
-
-bpg_decoder_open: l.cwrap('bpg_decoder_open', 'number', [ ]),
-
-bpg_decoder_decode: l.cwrap('bpg_decoder_decode', 'number', [ 'number', 'array', 'number' ]),
-
-bpg_decoder_get_info: l.cwrap('bpg_decoder_get_info', 'number', [ 'number', 'number' ]),
-
-bpg_decoder_start: l.cwrap('bpg_decoder_start', 'number', [ 'number', 'number' ]),
-
-bpg_decoder_get_frame_duration: l.cwrap('bpg_decoder_get_frame_duration', 'void', [ 'number', 'number', 'number' ]),
-
-bpg_decoder_get_line: l.cwrap('bpg_decoder_get_line', 'number', [ 'number', 'number' ]),
-
-bpg_decoder_close: l.cwrap('bpg_decoder_close', 'void', [ 'number' ] ),
-
-load: function(fileUint8Array)
-{
-    var img, w, h, img_info_buf, cimg, p0, rgba_line, w4, frame_count;
-    var heap8, heap16, heap32, dst, v, i, y, func, duration, frames, loop_count;
-
-    //    console.log("loaded " + data.byteLength + " bytes");
-
-    img = this.bpg_decoder_open();
-
-    if (this.bpg_decoder_decode(img, fileUint8Array, fileUint8Array.length) < 0) {
-        console.log("could not decode image");
-        return;
-    }
-
-    img_info_buf = this.malloc(5 * 4);
-    this.bpg_decoder_get_info(img, img_info_buf);
-    /* extract the image info */
-    heap8 = Module['HEAPU8'];
-    heap16 = Module['HEAPU16'];
-    heap32 = Module['HEAPU32'];
-    w = heap32[img_info_buf >> 2];
-    h = heap32[(img_info_buf + 4) >> 2];
-    loop_count = heap16[(img_info_buf + 16) >> 1];
-    //    console.log("image: w=" + w + " h=" + h + " loop_count=" + loop_count);
-
-    w4 = w * 4;
-    rgba_line = this.malloc(w4);
-
-    frame_count = 0;
-    frames = [];
-    for(;;) {
-        /* select RGBA32 output */
-        if (this.bpg_decoder_start(img, 1) < 0)
-            break;
-        this.bpg_decoder_get_frame_duration(img, img_info_buf,
-                                            img_info_buf + 4);
-        duration = (heap32[img_info_buf >> 2] * 1000) / heap32[(img_info_buf + 4) >> 2];
-
-        //cimg = this.ctx.createImageData(w, h);
-        cimg = { width: w, height: h, data: new Uint8ClampedArray(4*w*h) };
-        dst = cimg.data;
-        p0 = 0;
-        for(y = 0; y < h; y++) {
-            this.bpg_decoder_get_line(img, rgba_line);
-            for(i = 0; i < w4; i = (i + 1) | 0) {
-                dst[p0] = heap8[(rgba_line + i) | 0] | 0;
-                p0 = (p0 + 1) | 0;
+window.BPGDecoder = function(a) {
+    this.K = a;
+    this.frames = this.onload = this.imageData = k;
+    this.loop_count = 0
+};
+window.BPGDecoder.prototype = {
+    r: l.cwrap("malloc", "number", ["number"]),
+    o: l.cwrap("free", "void", ["number"]),
+    H: l.cwrap("bpg_decoder_open", "number", []),
+    C: l.cwrap("bpg_decoder_decode", "number", ["number", "array", "number"]),
+    F: l.cwrap("bpg_decoder_get_info", "number", ["number", "number"]),
+    I: l.cwrap("bpg_decoder_start", "number", ["number", "number"]),
+    D: l.cwrap("bpg_decoder_get_frame_duration", "void", ["number", "number", "number"]),
+    G: l.cwrap("bpg_decoder_get_line", "number", ["number", "number"]),
+    B: l.cwrap("bpg_decoder_close",
+        "void", ["number"]),
+    load: function(fileUint8Array) {
+        var a = new Uint8Array(fileUint8Array),
+            c = this,
+            f, g, j, m, p, q, K, r, n, s, u, G, z, ua, W, Qa;
+        f = c.H();
+        if (0 > c.C(f, a, a.length)) console.log("could not decode image");
+        else {
+            j = c.r(20);
+            c.F(f, j);
+            n = l.HEAPU8;
+            m = l.HEAPU16;
+            s = l.HEAPU32;
+            a = s[j >> 2];
+            g = s[j + 4 >> 2];
+            Qa = m[j + 16 >> 1];
+            K = 4 * a;
+            q = c.r(K);
+            r = 0;
+            for (W = []; !(0 > c.I(f, 1));) {
+                c.D(f, j, j + 4);
+                ua = 1E3 * s[j >> 2] / s[j + 4 >> 2];
+                m = c.K.createImageData(a, g);
+                u = m.data;
+                for (z = p = 0; z < g; z++) {
+                    c.G(f,
+                        q);
+                    for (G = 0; G < K; G = G + 1 | 0) u[p] = n[q + G | 0] | 0, p = p + 1 | 0
+                }
+                W[r++] = {
+                    img: m,
+                    duration: ua
+                }
             }
+            c.o(q);
+            c.o(j);
+            c.B(f);
+            c.loop_count = Qa;
+            c.frames = W;
+            c.imageData = W[0].img;
+            if (c.onload) c.onload()
         }
-        frames[frame_count++] = { 'img': cimg, 'duration': duration };
     }
+};
+window.onload = function() {
+    var a, d, c, e, f, g, j;
+    e = document.images;
+    d = e.length;
+    f = [];
+    for (a = 0; a < d; a++) c = e[a], g = c.src, ".bpg" == g.substr(-4, 4).toLowerCase() && (f[f.length] = c);
+    f.forEach(function(c) {
+        g = c.src;
+        e = document.createElement("canvas");
+        c.id && (e.id = c.id);
+        c.className && (e.className = c.className);
+        if (j = c.getAttribute("width") | 0) e.style.width = j + "px";
+        if (j = c.getAttribute("height") | 0) e.style.height = j + "px";
+        c.parentNode.replaceChild(e, c);
+        j = e.getContext("2d");
 
-    this.free(rgba_line);
-    this.free(img_info_buf);
+        fetch(g).then((r)=>r.arrayBuffer()).then((ab)=>new Uint8Array(ab)).then(function(g) {
+            var dec = new BPGDecoder(j);
+            dec.onload = function(a, c) {
+                function d() {
+                    var a =
+                        e.n;
+                    ++a >= f.length && (0 == e.loop_count || e.q < e.loop_count ? (a = 0, e.q++) : a = -1);
+                    0 <= a && (e.n = a, c.putImageData(f[a].img, 0, 0), setTimeout(d, f[a].duration))
+                }
+                var e = this,
+                    f = this.frames,
+                    g = f[0].img;
+                a.width = g.width;
+                a.height = g.height;
+                c.putImageData(g, 0, 0);
+                window.decodedImgData = g;
+                window.transcodedImage = 'data:image/jpeg;base64,' + btoa( encode(g,80).data.reduce(function(str,c){ return str+String.fromCharCode(c)}, '') );
+                var im=document.createElement('img'); im.src=window.transcodedImage; document.body.appendChild(im);
 
-    this.bpg_decoder_close(img);
-
-    this['loop_count'] = loop_count;
-    this['frames'] = frames;
-    this['imageData'] = frames[0]['img'];
-
-    return JPEGEncoder.encode(frames[0].img).data;
-},
-
-test: function() {
-    fetch('test.bpg')
-        .then((r)=>r.arrayBuffer())
-        .then((ab)=>new Uint8Array(ab))
-        .then(function(imageData) {
-            //var jpgData = (new BPGDecoder( document.createElement("canvas").getContext("2d") )).load(imageData);
-            var jpgData = (new BPGDecoder()).load(imageData);
-            var im = document.createElement('img');
-            im.src = 'data:image/jpeg;base64,' + btoa( jpgData.reduce(function(str,c){ return str+String.fromCharCode(c)}, '') );
-            document.body.appendChild(im);
-        });
-}
-
+                1 < f.length && (e.n = 0, e.q = 0, setTimeout(d, f[0].duration))
+            }.bind(dec, e, j);
+            dec.load(g);
+        }).catch((e)=>console.error(e));
+    });
 };
 
 
@@ -956,13 +928,25 @@ function JPEGEncoder(quality) {
 
 };
 
-JPEGEncoder.encode = function(imgData, qu) {
-    if (typeof qu === 'undefined') qu = 75;
-    var encoder = new JPEGEncoder(qu);
-  	var data = encoder.encode(imgData, qu);
-    return {
-      data: data,
-      width: imgData.width,
-      height: imgData.height
-    };
+function encode(imgData, qu) {
+  if (typeof qu === 'undefined') qu = 50;
+  var encoder = new JPEGEncoder(qu);
+	var data = encoder.encode(imgData, qu);
+  return {
+    data: data,
+    width: imgData.width,
+    height: imgData.height
+  };
+}
+
+// helper function to get the imageData of an existing image on the current page.
+function getImageDataFromImage(idOrElement){
+	var theImg = (typeof(idOrElement)=='string')? document.getElementById(idOrElement):idOrElement;
+	var cvs = document.createElement('canvas');
+	cvs.width = theImg.width;
+	cvs.height = theImg.height;
+	var ctx = cvs.getContext("2d");
+	ctx.drawImage(theImg,0,0);
+
+	return (ctx.getImageData(0, 0, cvs.width, cvs.height));
 }

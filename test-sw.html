@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>BPG2JPG transparent service worker polyfill demo</title>
+
+    <style>
+    </style>
+
+    <script src="./bpg2jpg.js"></script>
+
+    <script>
+      navigator.serviceWorker.register('./sw.js', {}).then(function(reg) {
+        console.log('service worker on-line, please reload!');
+
+      }, function(err) {
+        console.log('oops, service worker install kicked the bucket :(', err);
+        throw err;
+
+        });</script>
+
+    <script>
+    </script>
+  </head>
+
+  <body>
+    <h1>BPG2JPG transparent service worker polyfill demo</h1>
+    <p>
+      Once the service worker attached to the page is loaded and installed, reload the page to have all BPG images automatically transcoded into JPEG (and cached) in the background by the service worker:
+    </p>
+    <img src="test.bpg" alt="Test BPG image file" />
+    <p>
+      Note that on first reload it might take up to a second for the above image to appear (especially on slower systems &amp; mobile). This is because the service worker has to fetch the image from the network, and convert it into JPG format.
+    </p>
+    <p>
+      On subsequent reloads you will notice that the image is loaded almost instantly - since the service worker will serve the already-cashed JPG file for the request.
+    </p>
+  </body>
+</html>
