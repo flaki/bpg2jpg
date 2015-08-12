@@ -7,11 +7,9 @@
     <style>
     </style>
 
-    <script src="./bpg2jpg.js"></script>
-
     <script>
       navigator.serviceWorker.register('./sw.js', {}).then(function(reg) {
-        console.log('service worker on-line, please reload!');
+        console.log('service worker on-line!');
 
       }, function(err) {
         console.log('oops, service worker install kicked the bucket :(', err);
