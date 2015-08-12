@@ -6,4 +6,4 @@ and [jpeg-js by Eugene Ware et al](https://github.com/eugeneware/jpeg-js/tree/ma
 ## Test
 Try the BPG decoder with [test.html](https://flaki.github.io/bpg2jpg/test.html).
 
-Try the service worker based transparent polyfill with [test-sw.html](https://flaki.github.io/bpg2jpg/test.html).
+Try the service worker based transparent polyfill with [test-sw.html](https://flaki.github.io/bpg2jpg/test-sw.html).
