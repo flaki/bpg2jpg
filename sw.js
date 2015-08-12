@@ -24,7 +24,7 @@ self.addEventListener('activate', function(event) {
 
 
 self.addEventListener('fetch', function(event) {
-  console.log("Fetch: ", request.url);
+  console.log("> Fetch: ", event.request.url);
 
   if (event.request.url.match(/\.bpg$/i)) {
     event.respondWith( fetchBpgCacheJpg(event.request) );
