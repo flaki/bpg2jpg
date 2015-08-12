@@ -1,6 +1,7 @@
 console.log("service worker starting up");
 var Module = {};
-importScripts('bpg2jpg.js');
+importScripts('bpg2jpg-noasm.js');
+console.log("bpg decoder module loaded");
 
 
 self.addEventListener('install', function(event) {
@@ -13,7 +14,7 @@ self.addEventListener('install', function(event) {
     })
   );
 
-  console.log("service worker installed");
+  console.log("service worker installed, please reload!");
 });
 
 
@@ -23,6 +24,8 @@ self.addEventListener('activate', function(event) {
 
 
 self.addEventListener('fetch', function(event) {
+  console.log("Fetch: ", request.url);
+
   if (event.request.url.match(/\.bpg$/i)) {
     event.respondWith( fetchBpgCacheJpg(event.request) );
   }
