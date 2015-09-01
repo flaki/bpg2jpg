@@ -1,5 +1,7 @@
 console.log("service worker starting up");
 var Module = {};
+importScripts('/cache-polyfill.js');
+
 importScripts('bpg2jpg-noasm.js');
 console.log("bpg decoder module loaded");
 
