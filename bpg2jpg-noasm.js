@@ -203,8 +203,8 @@ load: function(fileUint8Array)
 
 test: function() {
     fetch('test.bpg')
-        .then((r)=>r.arrayBuffer())
-        .then((ab)=>new Uint8Array(ab))
+        .then(function(r) {r.arrayBuffer();})
+        .then(function(ab) {new Uint8Array(ab);})
         .then(function(imageData) {
             //var jpgData = (new BPGDecoder( document.createElement("canvas").getContext("2d") )).load(imageData);
             var jpgData = (new BPGDecoder()).load(imageData);
